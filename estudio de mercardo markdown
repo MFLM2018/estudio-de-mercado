@@ -1,0 +1,113 @@
+---
+title: "Estudio de Mercado y Rentabilidad"
+author: "MFLM"
+date: "`r Sys.Date()`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+**Generalidades**
+Este trabajo se realiza a fines de determinar el valor de la tierra en un sector preestablecido de la ciudad de Maldonado, como asi la determinacion de una rentabilidad inmobiliaria que apunta a pequeños desarrolladores o inversionistas tanto para la venta como asi para su alquiler anual/por temporada.
+
+**Presentacion del Caso**
+
+La finalidad de este trabajo es determinar el valor del suelo de un sector determinado, como asi el valor de venta de inmuebles con edificaciones existentes para asi poder determinar la rentabilidad de dicha zona al realizar edificaciones para la venta y de esta manera poder establecer si dicha zona es financieramnete acepatable para tal fin.
+
+**Informacion utilizada**
+
+***Generalidades*** para la realizacion de este estudio se utilizaron diferentes bases de datos, las mismas fueron procesadas a traves de metodologias valuatorias, financieras y predictivas.
+
+* -1-Base de datos personal geoposicionada (Valor del Suelo "Uruguay").
+* -2-Conjuntos de datos geoespaciales correspondientes al sector catastarl (Gobierno de Uruguay, Datos Abiertos).
+* -3-Base de datos personal geoposicionada (Mercado activo "Apartamentos, Viviendas, Comercio,Industria")
+
+**Atributos de las bases de datos**
+
+|Atributo|Base de Datos|
+|---------|------------|
+|ID|Valor del Suelo|
+|Valor por metr2(U$D)|Valor del Suelo|
+|Fecha de relevamiento|Valor del Suelo|
+|Coordenadas "X"|Valor del Suelo|
+|Coordenadas "Y"|Valor del Suelo|
+|Tipo de relevamiento|Valor del Suelo|
+|Padron|Catastro Urbano|
+|Departamento|Catastro Urbano|
+|Localidad|Catastro urbano|
+|Manzana|Catastro Urbano|
+|Area|Catastro Urbano|
+|Tipologia|Mercado Activo|
+|Superficies (cub,semi,des)|Mercado Activo|
+|Fecha|Mercado Activo|
+|Tipo Operacion|Mercado Activo|
+|Fuente|Mercado Activo|
+|Caracteristicas (dividido en diferentes atributos)|Mercado Activo|
+|Antiguedad|Mercado Activo|
+|Est. Conservacion|Mercado Activo|
+|ID|Mercado Activo|
+
+**Nomenclador de Atributos**
+
+* -1-***ID***= Identificador Numerico de la Muestra.
+* -2-***Valor del Metro2***= Indica el valor por metro2 de tierra.
+* -3-***Fecha***= Indica la fecha en que se relevo la muestra.
+* -4-***Coordenadas***= Hace referencia a las coordenadas X e Y con su respectivo SRC de la ubicacion geografica de la muestra.
+* -5-***Tipo de relevamiento***= este alude a la situacion de la muestra es decir del tipo de operacion.
+* -6-***Padron***= Es el número de identificación catastral.
+* -7-***Departamento***= Departamento geografico del pais.
+* -8-***Manzana***= Identificador de manzana de la parcela.
+* -9-***Area***= Superficie de la parcela.
+* -10-***Tipologia***= Indica la tipologia edilicia y su uso.
+* -11-***Fuente***= Referencia de la fuente del relevamiento de la muestra.
+* -12-***Caracteristicas***= Indica cualidades de la muestra.
+* -13-***Antiguedad***= Indica la antiguedad de la muestra (Inmueble).
+* -14-***Est. Conservacion***= Referencia el estado actual de la muestra.
+
+**Softwares Utilizados**
+
+* -1- ***QGIS***
+* -2- ***Excel***
+* -3- ***HeidiSQL***
+* -4- ***RStudio***
+
+
+**Instalacion de Paquetes y Librerias en RStudio para tratamiento de datos**
+
+```{r setup librerias y packetes, warning=FALSE, echo=FALSE, error=FALSE} 
+library(readxl)
+muestras <- read_excel("C:/Users/Marcelo/Desktop/portfolio/Portfolio_2/muestras.xlsx")
+library(ggplot2)
+library(tidyr)
+library(tidyverse)
+library(tidyselect)
+library(markdown)
+library(rmarkdown)
+library(dtplyr)
+muestras_edifica <- read_excel("C:/Users/Marcelo/Desktop/portfolio/Portfolio_2/muestras_edifica.xlsx")
+PZ <- read_excel("C:/Users/Marcelo/Desktop/portfolio/PZ.xlsx")
+```
+
+Valor del Suelo.
+===================
+
+***Zona Establecida para el estudio en la valorizacion del Suelo***
+
+<center> ![](C:\Users\Marcelo\Desktop\portfolio\Portfolio_2\Mapas\Sectorcatastral.jpeg){width="600px"}</center>
+
+* **Superficie Total en estudio** = 200665,00 Metros2.
+* **Mayor superficie parcelaria registrada** = 9945,00 Metros2.
+* **Menor superficie Registrada** = 645,00 Metros2.
+* **Cantidad de parcelas sometidas a estudio** = 147.
+
+***Muestras, Tratamiento y procesos***
+
+En la base de datos contamos con un tamaño muestras de 132 muestras, por lo que falta determinar el valor de 15 muestras, para poder realizar la valoracion de estas parcelas faltantes se realizo un geoproceso en QGIS, el cual es llamado "INTERPOLACION IDW", este geoproceso consiste en establecer valores desconocidos a traves de valores conocidos (Muestras), con este proceso obtenemos un raster el cual luego es cortado por la capa de mascara la cual es el sector parcelario en estudio, el siguiente paso es general una nube de puntos a partir de la capa catastral, esta nube de puntos servira para la extraccion de los pixeles valorizados en el raster generado en el paso anterior, para luego asi poder establecer el valor de las 15 parcelas sin valorizar; una vez terminado este proceso se procede a  la union de capas catastrales con la capa del total de muestras valorizadas, se genera un nuevo atributo en el cual se calculara el valor total de la parcela en funcion del valor del metro2.
+
+<center> ![](C:\Users\Marcelo\Desktop\portfolio\Portfolio_2\Mapas\Raster.jpeg){width="600px"}</center>
+<center> ![](C:\Users\Marcelo\Desktop\portfolio\Portfolio_2\Mapas\valorsup.jpeg){width="600px"}</center>
+
+```{r, echo=FALSE}
+ggplot(muestras, aes(id,Valor))+geom_line(linetype=1)+geom_point(col="red")+ labs(title = "Valor del Metro2 _ ID de Muestras_por fecha de relevamiento")+ facet_grid(.~Fecha)
+```
